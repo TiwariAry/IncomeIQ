@@ -1,0 +1,13 @@
+-- DATABASES
+
+PostgreSQL Database:
+npx tsx test/unit/database/postgresql.test.ts
+
+Redis Database:
+npx tsx test/unit/database/redis.test.ts
+
+Influx Database:
+npx tsx test/unit/database/influx.test.ts
+
+MongoDB Database:
+npx tsx test/unit/database/mongodb.test.ts

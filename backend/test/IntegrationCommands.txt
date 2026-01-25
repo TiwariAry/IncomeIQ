@@ -1,0 +1,13 @@
+-- Redis (Caching)
+
+Market Data:
+npx tsx test/integration/redis/marketData.test.ts
+
+Portfolio Calculation:
+npx tsx test/integration/redis/portfolioCalculation.test.ts
+
+Session Management:
+npx tsx test/integration/redis/sessionManagement.test.ts
+
+Rate Limiter:
+npx tsx test/integration/redis/rateLimiter.test.ts

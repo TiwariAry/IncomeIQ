@@ -1,0 +1,124 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("NEON_CONN_STRING")
+}
+
+// Enums
+enum RiskTolerance {
+  CONSERVATIVE
+  MODERATE
+  AGGRESSIVE
+}
+
+enum AssetType {
+  STOCK
+  ETF
+  CRYPTO
+  BOND
+}
+
+enum TransactionType {
+  BUY
+  SELL
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+// Models
+model User {
+  id              String         @id @default(uuid())
+  email           String         @unique
+  passwordHash    String         @map("password_hash")
+  firstName       String?        @map("first_name")
+  lastName        String?        @map("last_name")
+  phoneNumber     String?        @map("phone_number")
+  riskTolerance   RiskTolerance? @map("risk_tolerance")
+  investmentGoals String?        @map("investment_goals") @db.Text
+  isActive        Boolean        @default(true) @map("is_active")
+  role            Role           @default(USER)
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+
+  portfolios Portfolio[]
+
+  @@map("users")
+}
+
+model Portfolio {
+  id             String   @id @default(uuid())
+  userId         String   @map("user_id")
+  name           String
+  description    String?  @db.Text
+  initialCapital Decimal  @map("initial_capital") @db.Decimal(15, 2)
+  currentValue   Decimal  @map("current_value") @db.Decimal(15, 2)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  holdings     Holding[]
+  transactions Transaction[]
+
+  @@map("portfolios")
+}
+
+model Asset {
+  id           String    @id @default(uuid())
+  tickerSymbol String    @unique @map("ticker_symbol") @db.VarChar(10)
+  companyName  String    @map("company_name")
+  sector       String?
+  assetType    AssetType @map("asset_type")
+  exchange     String?
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  holdings     Holding[]
+  transactions Transaction[]
+
+  @@map("assets")
+}
+
+model Holding {
+  id                   String   @id @default(uuid())
+  portfolioId          String   @map("portfolio_id")
+  assetId              String   @map("asset_id")
+  quantity             Decimal  @db.Decimal(15, 4)
+  averagePurchasePrice Decimal  @map("average_purchase_price") @db.Decimal(15, 2)
+  currentPrice         Decimal  @map("current_price") @db.Decimal(15, 2)
+  totalValue           Decimal  @map("total_value") @db.Decimal(15, 2)
+  unrealizedGainLoss   Decimal  @map("unrealized_gain_loss") @db.Decimal(15, 2)
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  asset     Asset     @relation(fields: [assetId], references: [id], onDelete: Restrict)
+
+  @@unique([portfolioId, assetId])
+  @@map("holdings")
+}
+
+model Transaction {
+  id              String          @id @default(uuid())
+  portfolioId     String          @map("portfolio_id")
+  assetId         String          @map("asset_id")
+  transactionType TransactionType @map("transaction_type")
+  quantity        Decimal         @db.Decimal(15, 4)
+  pricePerUnit    Decimal         @map("price_per_unit") @db.Decimal(15, 2)
+  totalAmount     Decimal         @map("total_amount") @db.Decimal(15, 2)
+  fees            Decimal         @default(0) @db.Decimal(10, 2)
+  transactionDate DateTime        @map("transaction_date")
+  notes           String?         @db.Text
+  createdAt       DateTime        @default(now()) @map("created_at")
+
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  asset     Asset     @relation(fields: [assetId], references: [id], onDelete: Restrict)
+
+  @@map("transactions")
+}

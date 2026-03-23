@@ -1,6 +1,37 @@
-/frontend
+# =========================
+# Environment Variables
+# =========================
+.env
+.env.*
+*.env
 
-/backend/node_modules
-/backend/.env
+# =========================
+# Node.js (Frontend & Backend)
+# =========================
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
 
-/.idea
+# Build outputs
+frontend/dist/
+frontend/build/
+
+# =========================
+# Python (AI Microservice)
+# =========================
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# =========================
+# OS & Editor Files
+# =========================
+.DS_Store
+.idea/
+.vscode/
+*.log

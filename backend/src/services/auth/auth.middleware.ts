@@ -1,11 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { PrismaClient } from '@prisma/client';
 import { asyncHandler } from "../../utils/asyncHandler";
 import ApiError from "../../utils/apiError";
 import { sessionService } from '../../config/database/redis/redis.service';
-
-const prisma = new PrismaClient();
+import prismaClient from '../../config/database/postgresql/postgresql';
 
 export const protect = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
     let token;
@@ -22,7 +20,7 @@ export const protect = asyncHandler(async (req: Request, res: Response, next: Ne
                 throw new ApiError(401, 'Session expired or logged out.');
             }
 
-            const user = await prisma.user.findUnique({
+            const user = await prismaClient.user.findUnique({
                 where: { id: decoded.userId },
                 select: { id: true, email: true, role: true }
             });

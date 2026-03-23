@@ -96,11 +96,11 @@ async function testPortfolioCalculation() {
         const isCorrect = Math.abs(cashDiff - expectedCost) < 0.5;
         assert(isCorrect, 'Cash deduction matches asset cost');
 
-        // 5. Check Cache (THE FIX)
+        // 5. Check Cache
         console.log('\n5. Checking Cache...');
 
         // Call 'Get All Portfolios' to populate the cache
-        // The 'buy' action deleted the cache. We must call this to refill it.
+        // The 'buy' action deleted the cache
         await request(app)
             .get('/api/v1/portfolio')
             .set('Authorization', `Bearer ${token}`);

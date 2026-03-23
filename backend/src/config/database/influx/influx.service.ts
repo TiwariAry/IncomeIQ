@@ -1,7 +1,6 @@
 import { Point } from '@influxdata/influxdb-client'
 import {influxQueryApi, influxWriteApi} from "./influx.js";
 
-// Define a clean interface for what the rest of the app expects
 export interface StockData {
     symbol: string;
     price: number;
@@ -21,7 +20,6 @@ export const influxService = {
     },
 
     getHistoricalPrices: async (symbol: string, timeRange: string = '-24h'): Promise<StockData[]> => {
-        // We use "pivot" to turn _field rows into actual columns (price, volume)
         const fluxQuery = `
             from(bucket: "${process.env.INFLUXDB_BUCKET}")
                 |> range(start: ${timeRange})
@@ -32,11 +30,11 @@ export const influxService = {
 
         const rawRows = await influxQueryApi.collectRows(fluxQuery)
 
-        // Map the raw Influx row to our clean interface
+        // Map the raw Influx row to clean interface
         return rawRows.map((row: any) => ({
             symbol: row.symbol,
-            price: row.price,   // Now this will exist because of pivot()
-            volume: row.volume, // This too
+            price: row.price,   // exist because of pivot()
+            volume: row.volume, // same
             time: new Date(row._time)
         }));
     }

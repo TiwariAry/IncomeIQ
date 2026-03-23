@@ -77,7 +77,7 @@ async function testSessionManagement() {
         assert(blockedRes.statusCode === 401, 'Access Denied (401 Unauthorized)');
 
 
-        console.log('\nSession Management Verified!');
+        console.log('\nAll tests passed!');
 
     } catch (error) {
         console.error('\nTest Failed:', error);

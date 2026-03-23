@@ -58,6 +58,7 @@ model Portfolio {
   userId         String   @map("user_id")
   name           String
   description    String?  @db.Text
+  goal           String?
   initialCapital Decimal  @map("initial_capital") @db.Decimal(15, 2)
   currentValue   Decimal  @map("current_value") @db.Decimal(15, 2)
   createdAt      DateTime @default(now()) @map("created_at")

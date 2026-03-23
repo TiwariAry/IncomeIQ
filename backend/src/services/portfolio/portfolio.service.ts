@@ -1,19 +1,18 @@
-import { PrismaClient } from '@prisma/client';
 import { marketDataService } from '../marketData/marketData.service';
 import { portfolioService as redisPortfolioCache } from '../../config/database/redis/redis.service';
 import ApiError from "../../utils/apiError";
-
-const prisma = new PrismaClient();
+import prismaClient from '../../config/database/postgresql/postgresql';
 
 export const portfolioService = {
-    createPortfolio: async (userId: string, name: string, initialCapital: number, description?: string) => {
-        const portfolio = await prisma.portfolio.create({
+    createPortfolio: async (userId: string, name: string, initialCapital: number, description?: string, goal?: string) => {
+        const portfolio = await prismaClient.portfolio.create({
             data: {
                 userId,
                 name,
                 initialCapital,
                 currentValue: initialCapital,
-                description
+                description,
+                goal
             }
         });
 
@@ -25,7 +24,7 @@ export const portfolioService = {
         const cached = await redisPortfolioCache.get(userId);
         if (cached) return cached;
 
-        const portfolios = await prisma.portfolio.findMany({
+        const portfolios = await prismaClient.portfolio.findMany({
             where: { userId },
             include: {
                 holdings: { include: { asset: true } }
@@ -51,7 +50,7 @@ export const portfolioService = {
         const totalCost = quantity * pricePerUnit;
 
         // Start Database Transaction
-        return prisma.$transaction(async (tx) => {
+        return prismaClient.$transaction(async (tx) => {
             const portfolio = await tx.portfolio.findUnique({ where: { id: portfolioId } });
 
             console.log("DEBUG CHECK:");
@@ -148,7 +147,7 @@ export const portfolioService = {
     },
 
     getPortfolioSummary: async (portfolioId: string, userId: string) => {
-        const portfolio = await prisma.portfolio.findUnique({
+        const portfolio = await prismaClient.portfolio.findUnique({
             where: { id: portfolioId },
             include: {
                 holdings: { include: { asset: true } }
@@ -200,7 +199,8 @@ export const portfolioService = {
             totalValue: totalEquity,
             initialCapital: Number(portfolio.initialCapital),
             totalGainLoss: totalEquity - Number(portfolio.initialCapital),
-            holdings: enrichedHoldings
+            holdings: enrichedHoldings,
+            goal: portfolio.goal || 'Balanced Growth',
         };
     }
 };

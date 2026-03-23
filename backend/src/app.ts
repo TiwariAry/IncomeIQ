@@ -3,8 +3,9 @@ import cors from 'cors'
 import morgan from 'morgan'
 import cookieParser from 'cookie-parser'
 
-import authRoutes from "./services/auth/auth.routes";
 import {connectDB} from "./config/database/mongodb/mongodb";
+
+import authRoutes from "./services/auth/auth.routes";
 import marketDataRoutes from "./services/marketData/marketData.routes";
 import portfolioRoutes from "./services/portfolio/portfolio.routes";
 import analysisRoutes from './services/analysis/analysis.routes';
@@ -20,10 +21,10 @@ app.use(express.json())
 app.use(cookieParser())
 
 // Routes
-app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/auth', authRoutes)
 app.use('/api/v1/market', marketDataRoutes)
 app.use('/api/v1/portfolio', portfolioRoutes)
-app.use('/api/v1/analysis', analysisRoutes);
+app.use('/api/v1/analysis', analysisRoutes)
 
 app.get('/', (req, res) => {
     res.status(200).json({

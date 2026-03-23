@@ -40,7 +40,6 @@ const start = async () => {
         await connectDB()
         app.listen(PORT, () => {
             console.log("Listening on port: " + PORT)
-            console.log("http://localhost:" + PORT)
         })
     }
     catch (error) {

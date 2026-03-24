@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 import numpy as np
 
@@ -6,13 +7,22 @@ from risk_model import train_risk_model, predict_risk
 from stress_model import train_vae, generate_scenarios
 from xai_model import generate_explanation
 
-app = FastAPI()
+models = {}
 
-predictive_model = train_model()
-risk_model = train_risk_model()
-stress_model = train_vae()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Runs on startup — port is already bound by this point
+    print("Training models...")
+    models["predictive"] = train_model()
+    models["risk"] = train_risk_model()
+    models["stress"] = train_vae()
+    print("All models ready.")
+    yield
+    # Runs on shutdown (cleanup if needed)
+    models.clear()
 
-# --- Helper to convert NumPy types to Python types for JSON ---
+app = FastAPI(lifespan=lifespan)
+
 def clean_output(obj):
     if isinstance(obj, np.integer):
         return int(obj)
@@ -25,23 +35,23 @@ def clean_output(obj):
     elif isinstance(obj, list):
         return [clean_output(v) for v in obj]
     return obj
-# --------------------------------------------------------------
+
+@app.get("/")
+def health():
+    return {"status": "ok", "models_loaded": len(models) == 3}
 
 @app.post("/predict")
 def predict_api(data: dict):
     prices = np.array(data["prices"])
-    return clean_output(predict(predictive_model, prices))
-
+    return clean_output(predict(models["predictive"], prices))
 
 @app.post("/risk")
 def risk_api(data: dict):
-    return clean_output(predict_risk(risk_model, data["features"]))
-
+    return clean_output(predict_risk(models["risk"], data["features"]))
 
 @app.post("/stress")
 def stress_api():
-    return clean_output(generate_scenarios(stress_model))
-
+    return clean_output(generate_scenarios(models["stress"]))
 
 @app.post("/explain")
 def explain_api(data: dict):

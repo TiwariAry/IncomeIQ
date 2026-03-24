@@ -11,7 +11,7 @@ export const setAccessToken = (token) => {
 
 // 3. Create the Axios instance
 const api = axios.create({
-    baseURL: 'http://localhost:3000/api/v1', // Ensure this matches your backend port
+    baseURL: 'https://incomeiq-zsle.onrender.com/api/v1',
     headers: {
         'Content-Type': 'application/json',
     },
